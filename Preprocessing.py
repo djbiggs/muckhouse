@@ -1,5 +1,5 @@
 ##Preprocessing Images to minimize non target edges
-##
+## Solving for 1 needs to be rewritten for set based.
 
 import cv2
 import numpy as np
