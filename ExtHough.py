@@ -1,5 +1,12 @@
 import cv2
 import numpy as np 
+import glob
+
+
+### A script for the base case of cropping a core box ie by finding the centres of hough line intersection clusters... 
+### seems to work ok for ultra base cases, 
+### TO DO refine the preprocessing using??? marker-based image segmentation using watershed algorithm
+### Write for sets.
 
 def find_intersection(line1, line2):
     # extract points
@@ -28,27 +35,37 @@ def cluster_points(points, nclusters):
     _, _, centers = cv2.kmeans(points, nclusters, None, criteria, 10, cv2.KMEANS_PP_CENTERS)
     return centers
 
-img = cv2.imread('test_img_0.jpg')
+#images = [cv2.imread(file) for file in glob.glob("/Users/davidbiggs/Desktop/Core/*.jpg")]
+img = cv2.imread('test_img_4.jpg')
+
 
 # preprocessing
-img = cv2.resize(img, None, fx=.5, fy=.5)
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-edges = cv2.Canny(gray, 50, 150)
-dilated = cv2.dilate(edges, np.ones((4,4), dtype=np.uint8))
+## define the size of the kernel to use for dialation
+## dilate the image using the kernel
+kernel = np.ones((5,7), np.uint8)
 
-cv2.imshow("Dilated", dilated)
-cv2.waitKey(0)
-cv2.imwrite('dilated.png', dilated)
+img_dilation = cv2.dilate(img, kernel, iterations=4)
+
+##Median Blur Filter
+# uses the median in a 7 by 7 neighborhood to reassign each pixel
+dilated = cv2.medianBlur(img_dilation, ksize = 5)
+
+##Shrinking and enlarging
+img_dilmed = cv2.resize(img, None, fx=.5, fy=.5)
+## Or Bilateral filtering for colour http://opencvexamples.blogspot.com/2013/10/applying-bilateral-filter.html
+
+# apertureSize argument is the size of the filter for derivative approximation
+dilated = cv2.Canny(img_dilmed, threshold1 = 0, threshold2 = 100, apertureSize = 7)
 
 # run the Hough transform
-lines = cv2.HoughLinesP(dilated, rho=1, theta=np.pi/180, threshold=100, maxLineGap=20, minLineLength=50)
+lines = cv2.HoughLinesP(dilated, rho=1, theta=np.pi/180, threshold=100, maxLineGap=20, minLineLength=100)
 
 # segment the lines
 delta = 10
 h_lines, v_lines = segment_lines(lines, delta)
 
 # draw the segmented lines
-houghimg = img.copy()
+houghimg = dilated.copy()
 for line in h_lines:
     for x1, y1, x2, y2 in line:
         color = [0,0,255] # color hoz lines red
@@ -58,9 +75,9 @@ for line in v_lines:
         color = [255,0,0] # color vert lines blue
         cv2.line(houghimg, (x1, y1), (x2, y2), color=color, thickness=1)
 
-cv2.imshow("Segmented Hough Lines", houghimg)
-cv2.waitKey(0)
-cv2.imwrite('hough.png', houghimg)
+#cv2.imshow("Segmented Hough Lines", houghimg)
+#cv2.waitKey(0)
+#cv2.imwrite('hough.png', houghimg)
 
 # find the line intersection points
 Px = []
@@ -72,7 +89,7 @@ for h_line in h_lines:
         Py.append(py)
 
 # draw the intersection points
-intersectsimg = img.copy()
+intersectsimg = dilated.copy()
 for cx, cy in zip(Px, Py):
     cx = np.round(cx).astype(int)
     cy = np.round(cy).astype(int)
@@ -93,8 +110,9 @@ print(centers)
 for cx, cy in centers:
     cx = np.round(cx).astype(int)
     cy = np.round(cy).astype(int)
-    cv2.circle(img, (cx, cy), radius=4, color=[0,0,255], thickness=-1) # -1: filled circle
+    cv2.circle(dilated, (cx, cy), radius=20, color=[0,0,255], thickness=-1) # -1: filled circle
 
-cv2.imshow("Center of intersection clusters", img)
+
+cv2.imshow("Center of intersection clusters",dilated)
 cv2.waitKey(0)
-cv2.imwrite('corners.png', img)
+cv2.imwrite('corners.png', dilated	)
