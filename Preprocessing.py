@@ -1,75 +1,93 @@
+#!usr/bin/env python3
 """
-Preprocesses images to minimize non target edges.
+Preprocesses image functions to minimize non target edges.
 """
 
 import cv2
-import numpy as np
 import math
+import numpy as np
 
 
-img = cv2.imread('test_img_6.jpg', 0)
+def showImageAndWait(name, img):
+    cv2.imshow(name, img)
+    cv2.waitKey(0)
 
 
-cv2.imshow('Input', img)
-cv2.waitKey(0)
+def prepImg(imgPath = './competition_files/datasets/train/Image199_2TPP_5R_MT_AS.jpg', isVerbose = True):
 
-## define the size of the kernel to use for dialation
-## dilate the image using the kernel
-kernel = np.ones((5,9), np.uint8)
-img = cv2.dilate(img, kernel, iterations=1)
+    # Read in the image
+    result = cv2.imread(imgPath, 0)
 
-cv2.imshow('Dilation', img)
-cv2.waitKey(0)
+    if isVerbose:
+        showImageAndWait('Input', result)
 
-##Median Blur Filter
-# uses the median in a 7 by 7 neighborhood to reassign each pixel
-img = cv2.medianBlur(img, ksize = 7)
+    # Dilate
+    # Define the size of the kernel for dialation, then dilate.
+    kernel = np.ones((5,9), np.uint8)
+    result = cv2.dilate(result, kernel, iterations=1)
 
-cv2.imshow('Dilation Median Blur', img)
-cv2.waitKey(0)
-
-###Gaussian Blur to disturb smaller edges rather than the larger.
-##img = cv2.GaussianBlur(src = img, ksize = (3,3), sigmaX = 3)
-
-#cv2.imshow('GBlur', img)
-#cv2.waitKey(0)
-
-##Shrinking and enlarging
-img = cv2.resize(img, None, fx=0.2, fy=0.2)
-img = cv2.resize(img, None, fx= 5, fy=5)
-
-cv2.imshow('Resized', img)
-cv2.waitKey(0)
-
-## Or Bilateral filtering for colour http://opencvexamples.blogspot.com/2013/10/applying-bilateral-filter.html
-## cv.GetSize(im)
-
-# apertureSize argument is the size of the filter for derivative approximation
-img = cv2.Canny(img, threshold1 = 20000, threshold2 = 50000 ,apertureSize = 7)
-
-cv2.imshow('CannyEdge', img)
-cv2.waitKey(0)
-
-kernel2 = np.ones((2,2), np.uint8)
-img = cv2.dilate(img, kernel2, iterations=2)
-
-cv2.imshow('Dialation2', img)
-cv2.waitKey(0)
-
-## Hough lines feature picking
-##hlines =cv2.HoughLinesP(candm, rho = 1, theta = math.pi/180, threshold = 70, minLineLength = 100, maxLineGap = 10)
-
-#Contour Search, method takes just the corner coordinates-- need to pass this,creates a numpy list of non redundant contour corner points
-img, contours, hierarchy = cv2.findContours(img, mode = cv2.RETR_LIST, method = cv2.CHAIN_APPROX_SIMPLE)
-cv2.drawContours(img, contours, 5, (100,100,255), 2)
-
-cv2.imshow('FinalContours', img)
-
-## Display
-
-##cv2.imshow('Hough Lines', hlines)
+    if isVerbose:
+        showImageAndWait('Dilation', result)
 
 
-cv2.waitKey(0)
+    # Median Blur Filter
+    # uses the median in a 7 by 7 neighborhood to reassign each pixel
+    result = cv2.medianBlur(result, ksize = 7)
 
+    if isVerbose:
+        showImageAndWait('Dilation', result)
+
+
+    # Gaussian Blur to disturb smaller edges rather than the larger.
+    # result = cv2.GaussianBlur(src = img, ksize = (3,3), sigmaX = 3)
+    # if isVerbose:
+    #     showImageAndWait('GBlur', result)
+
+
+    # Shrinking and enlarging
+    result = cv2.resize(result, None, fx=0.2, fy=0.2)
+    result = cv2.resize(result, None, fx= 5, fy=5)
+
+    if isVerbose:
+        showImageAndWait('Resized', result)
+
+
+    # Or Bilateral filtering for colour
+    # http://opencvexamples.blogspot.com/2013/10/applying-bilateral-filter.html
+    # cv.GetSize(im)
+
+    # Canny edge detection
+    # apertureSize is size of filter for derivative approximation
+    result = cv2.Canny(result, threshold1 = 20000, threshold2 = 50000, apertureSize = 7)
+
+    if isVerbose:
+        showImageAndWait('Canny Edge', result)
+
+
+    # Dilate again
+    kernel2 = np.ones((2,2), np.uint8)
+    result = cv2.dilate(result, kernel2, iterations = 2)
+
+    cv2.imshow('Dialation 2', result)
+
+
+    # Hough lines feature picking
+    # hlines = cv2.HoughLinesP(candm, rho = 1, theta = math.pi/180, threshold = 70, minLineLength = 100, maxLineGap = 10)
+    # if isVerbose:
+    #     showImageAndWait('Hough Lines', result)
+
+
+    # Contour Search,
+    # method takes corner coordinates-- need to pass this,creates a numpy list of non redundant contour corner points
+    result, contours, hierarchy = cv2.findContours(result, mode = cv2.RETR_LIST, method = cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(result, contours, 5, (100,100,255), 2)
+
+    if isVerbose:
+        showImageAndWait('Final Contours', result)
+
+    return result
+
+
+if __name__ == '__main__':
+    prepImg()
 

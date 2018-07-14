@@ -1,17 +1,18 @@
 #!usr/bin/env python3
+"""
+Batch process source images with the preprocessing steps.
+Writes optimised images to output directory.
+"""
 
-import os, fnmatch, cv2
+import cv2
+import fnmatch
+import os
+from Preprocessing import prepImg
 
 
 DIR_TRAIN = './competition_files/datasets/train/'
 DIR_TEST = './competition_files/datasets/test/'
 DIR_OUTPUT = './output/'
-
-
-def prep(imgPath):
-    # do all the things to prep the image
-    # return img
-    return cv2.imread(imgPath, 0)
 
 
 def getImages(path = DIR_TRAIN):
@@ -25,14 +26,25 @@ def getImages(path = DIR_TRAIN):
 
 
 if __name__ == "__main__":
-    listOfImages = getImages(DIR_TRAIN)
+    path = DIR_TRAIN
+
+    print('Getting the list of images from ' + path)
+    listOfImages = getImages(path)
 
     if not(os.path.isdir(DIR_OUTPUT)):
+        print(DIR_OUTPUT + ' already exists.')
         os.mkdir(DIR_OUTPUT)
+    else:
+        print(DIR_OUTPUT + ' doesn\'t exist, creating it.')
 
-
+    num = 0
     for imgName in listOfImages:
-        processedImg = prep(imgName)
-        # cv2.imshow(processedImg)
+        num += 1
+        print(str(num) + ': ' + imgName)
+        print('processing...')
+        processedImg = prepImg(path + imgName, False)
+        print('writing...')
         cv2.imwrite(DIR_OUTPUT + imgName, processedImg)
 
+    print('')
+    print('Done!')
