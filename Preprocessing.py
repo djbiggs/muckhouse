@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 import math
 
-img = cv2.imread('test_img_5.jpg', 0)
+img = cv2.imread('test_img_6.jpg', 0)
 
 
 cv2.imshow('Input', img)
