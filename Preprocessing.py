@@ -7,10 +7,18 @@ import cv2
 import math
 import numpy as np
 
+from matplotlib import pyplot as plt
+
 
 def showImageAndWait(name, img):
-    cv2.imshow(name, img)
+    WIN_WIDTH = 1280
+    imgHeight, imgWidth = img.shape
+    winHeight = int(round((WIN_WIDTH / imgWidth) * imgHeight))
+
+    cv2.namedWindow(name, cv2.WINDOW_NORMAL)
+    cv2.imshow(name, cv2.resize(img, (WIN_WIDTH, winHeight)))
     cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 def prepImg(imgPath = './competition_files/datasets/train/Image199_2TPP_5R_MT_AS.jpg', isVerbose = True):
