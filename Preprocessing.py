@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 import math
 
-img = cv2.imread('test_img_4.jpg', 0)
+img = cv2.imread('test_img_5.jpg', 0)
 
 
 cv2.imshow('Input', img)
@@ -43,7 +43,7 @@ cv2.waitKey(0)
 ## cv.GetSize(im)
 
 # apertureSize argument is the size of the filter for derivative approximation
-img = cv2.Canny(img, threshold1 = 0, threshold2 = 100, apertureSize = 7)
+img = cv2.Canny(img, threshold1 = 20000, threshold2 = 50000 ,apertureSize = 7)
 
 cv2.imshow('CannyEdge', img)
 cv2.waitKey(0)
@@ -71,8 +71,3 @@ cv2.imshow('FinalContours', img)
 cv2.waitKey(0)
 
 
-
-##Gaussian Blur to disturb smaller edges rather than the larger. 
-##img = cv2.GaussianBlur(src = img, ksize = (3,3), sigma = 0)
-## to see the 3 by 3 filter matrix that the image bw is convolved with above:
-##v2.getGaussianKernel(ksize = 3, sigma = 0) * cv2.getGaussianKernel(3, 0).T
