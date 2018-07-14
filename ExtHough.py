@@ -38,46 +38,87 @@ def cluster_points(points, nclusters):
 ##images = [cv2.imread(file) for file in glob.glob("/Users/davidbiggs/Desktop/Core/*.jpg")]
 img = cv2.imread("test_img_4.jpg" )
 
-
-# preprocessing
 ## define the size of the kernel to use for dialation
 ## dilate the image using the kernel
-kernel = np.ones((5,7), np.uint8)
+kernel = np.ones((5,9), np.uint8)
+img = cv2.dilate(img, kernel, iterations=1)
 
-img_dilation = cv2.dilate(img, kernel, iterations=4)
+cv2.imshow('Dilation', img)
+cv2.waitKey(0)
 
 ##Median Blur Filter
 # uses the median in a 7 by 7 neighborhood to reassign each pixel
-dilated = cv2.medianBlur(img_dilation, ksize = 5)
+img = cv2.medianBlur(img, ksize = 7)
+
+cv2.imshow('Dilation Median Blur', img)
+cv2.waitKey(0)
+
+###Gaussian Blur to disturb smaller edges rather than the larger. 
+##img = cv2.GaussianBlur(src = img, ksize = (3,3), sigmaX = 3)
+
+#cv2.imshow('GBlur', img)
+#cv2.waitKey(0)
 
 ##Shrinking and enlarging
-img_dilmed = cv2.resize(img, None, fx=.5, fy=.5)
+img = cv2.resize(img, None, fx=0.2, fy=0.2)
+img = cv2.resize(img, None, fx= 5, fy=5)
+
+cv2.imshow('Resized', img)
+cv2.waitKey(0)
+
 ## Or Bilateral filtering for colour http://opencvexamples.blogspot.com/2013/10/applying-bilateral-filter.html
+## cv.GetSize(im)
 
 # apertureSize argument is the size of the filter for derivative approximation
-dilated = cv2.Canny(img_dilmed, threshold1 = 0, threshold2 = 100, apertureSize = 7)
+img = cv2.Canny(img, threshold1 = 10000, threshold2 = 30000 ,apertureSize = 7)
+
+cv2.imshow('CannyEdge', img)
+cv2.waitKey(0)
+  
+kernel2 = np.ones((2,2), np.uint8)
+img = cv2.dilate(img, kernel2, iterations=2)
+
+cv2.imshow('Dialation2', img)
+cv2.waitKey(0)
+
+## Hough lines feature picking
+##hlines =cv2.HoughLinesP(candm, rho = 1, theta = math.pi/180, threshold = 70, minLineLength = 100, maxLineGap = 10)
+ 
+#Contour Search, method takes just the corner coordinates-- need to pass this,creates a numpy list of non redundant contour corner points
+img, contours, hierarchy = cv2.findContours(img, mode = cv2.RETR_LIST, method = cv2.CHAIN_APPROX_SIMPLE)
+cv2.drawContours(img, contours, 5, (100,100,255), 2)
+
+
+cv2.imshow('FinalContours', img)
+
+## Display
+
+##cv2.imshow('Hough Lines', hlines)
+ 
+
+cv2.waitKey(0)
 
 # run the Hough transform
-lines = cv2.HoughLinesP(dilated, rho=1, theta=np.pi/180, threshold=100, maxLineGap=20, minLineLength=100)
+lines = cv2.HoughLinesP(img, rho=1, theta=np.pi/180, threshold=100, maxLineGap=20, minLineLength=100)
 
 # segment the lines
 delta = 10
 h_lines, v_lines = segment_lines(lines, delta)
 
 # draw the segmented lines
-houghimg = dilated.copy()
+houghimg = img.copy()
 for line in h_lines:
     for x1, y1, x2, y2 in line:
-        color = [0,0,255] # color hoz lines red
-        cv2.line(houghimg, (x1, y1), (x2, y2), color=color, thickness=1)
+        color = [255,0,0] # color hoz lines red
+        cv2.line(houghimg, (x1, y1), (x2, y2), color=color, thickness=2)
 for line in v_lines:
     for x1, y1, x2, y2 in line:
-        color = [255,0,0] # color vert lines blue
-        cv2.line(houghimg, (x1, y1), (x2, y2), color=color, thickness=1)
+        color = [0,0,255] # color vert lines blue
+        cv2.line(houghimg, (x1, y1), (x2, y2), color=color, thickness=2)
 
-#cv2.imshow("Segmented Hough Lines", houghimg)
-#cv2.waitKey(0)
-#cv2.imwrite('hough.png', houghimg)
+cv2.imshow("Segmented Hough Lines", houghimg)
+cv2.waitKey(0)
+cv2.imwrite('hough.png', houghimg)
 
 # find the line intersection points
 Px = []
@@ -89,7 +130,7 @@ for h_line in h_lines:
         Py.append(py)
 
 # draw the intersection points
-intersectsimg = dilated.copy()
+intersectsimg = img.copy()
 for cx, cy in zip(Px, Py):
     cx = np.round(cx).astype(int)
     cy = np.round(cy).astype(int)
@@ -110,9 +151,9 @@ print(centers)
 for cx, cy in centers:
     cx = np.round(cx).astype(int)
     cy = np.round(cy).astype(int)
-    cv2.circle(dilated, (cx, cy), radius=20, color=[0,0,255], thickness=-1) # -1: filled circle
+    cv2.circle(img, (cx, cy), radius=20, color=[255,255,255], thickness=-1) # -1: filled circle
 
 
-cv2.imshow("Center of intersection clusters",dilated)
+cv2.imshow("Center of intersection clusters",img)
 cv2.waitKey(0)
-cv2.imwrite('corners.png', dilated	)
+cv2.imwrite('corners.png', img	)
