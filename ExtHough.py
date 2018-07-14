@@ -35,8 +35,8 @@ def cluster_points(points, nclusters):
     _, _, centers = cv2.kmeans(points, nclusters, None, criteria, 10, cv2.KMEANS_PP_CENTERS)
     return centers
 
-#images = [cv2.imread(file) for file in glob.glob("/Users/davidbiggs/Desktop/Core/*.jpg")]
-img = cv2.imread('test_img_4.jpg')
+##images = [cv2.imread(file) for file in glob.glob("/Users/davidbiggs/Desktop/Core/*.jpg")]
+img = cv2.imread("test_img_4.jpg" )
 
 
 # preprocessing
