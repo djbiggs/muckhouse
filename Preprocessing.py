@@ -3,42 +3,67 @@
 
 import cv2
 import numpy as np
+import math
 
 img = cv2.imread('test_img_0.jpg', 0)
 
+
+cv2.imshow('Input', img)
+cv2.waitKey(0)
+
 ## define the size of the kernel to use for dialation
 ## dilate the image using the kernel
-kernel = np.ones((5,5), np.uint8)
-img_dilation = cv2.dilate(img, kernel, iterations=2)
+kernel = np.ones((2,3), np.uint8)
+img = cv2.dilate(img, kernel, iterations=4)
+
+
+cv2.imshow('Dilation', img)
+cv2.waitKey(0)
 
 ##Median Blur Filter
 # uses the median in a 7 by 7 neighborhood to reassign each pixel
-img_dilmed = cv2.medianBlur(img_dilation, ksize = 7)
-img_med = cv2.medianBlur(img_dilation, ksize = 7)
+img = cv2.medianBlur(img, ksize = 5)
 
-##Shrinking and enlarging to do!
+cv2.imshow('Dilation Median Blur', img)
+cv2.waitKey(0)
+
+##Shrinking and enlarging
+img = cv2.resize(img, None, fx=0.5, fy=0.5)
+img = cv2.resize(img, None, fx=2, fy=2)
+
+cv2.imshow('Resized', img)
+cv2.waitKey(0)
+
 ## Or Bilateral filtering for colour http://opencvexamples.blogspot.com/2013/10/applying-bilateral-filter.html
+## cv.GetSize(im)
 
+candm = img
 # apertureSize argument is the size of the filter for derivative approximation
-candm = cv2.Canny(img_dilmed, threshold1 = 0, threshold2 = 50, apertureSize = 3)
+candm = cv2.Canny(img, threshold1 = 0, threshold2 = 100, apertureSize = 7)
+
+cv2.imshow('CannyEdge', candm)
+cv2.waitKey(0)
+
+kernel2 = np.ones((2,2), np.uint8)
+candm = cv2.dilate(candm, kernel2, iterations=1)
+
+cv2.imshow('Dialation2', candm)
+cv2.waitKey(0)
 
 ## Hough lines feature picking
-##cv2.HoughLinesP(edges, rho = 1, theta = math.pi / 180, threshold = 70, minLineLength = 100, maxLineGap = 10)
+##hlines =cv2.HoughLinesP(candm, rho = 1, theta = math.pi/180, threshold = 70, minLineLength = 100, maxLineGap = 10)
  
 #Contour Search, method takes just the corner coordinates-- need to pass this,creates a numpy list of non redundant contour corner points
 candm, contours, hierarchy = cv2.findContours(candm, mode = cv2.RETR_LIST, method = cv2.CHAIN_APPROX_SIMPLE)
-##cnt = contours[4]
-##cv2.drawContours(candm, [cnt], -1, (255,0,0), 3)
-cv2.drawContours(candm, contours, -1, (100,100,255), 6)
+cv2.drawContours(candm, contours, 5, (100,100,255), 2)
+
+cv2.imshow('FinalContours', candm)
+
+
 ## Display
-cv2.imshow('Input', img)
 
-cv2.imshow('Dilation', img_dilation)
-
-cv2.imshow('Dilation Median Blur', img_dilmed)
-
-cv2.imshow('CannyEdge with Fat Contours', candm)
-
+##cv2.imshow('Hough Lines', hlines)
+ 
 
 cv2.waitKey(0)
 
