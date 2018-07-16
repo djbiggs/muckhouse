@@ -7,7 +7,8 @@ import cv2
 import math
 import numpy as np
 
-from matplotlib import pyplot as plt
+
+DEFAULT_IMG = './competition_files/datasets/train/Image199_2TPP_5R_MT_AS.jpg'
 
 
 def showImageAndWait(name, img):
@@ -21,7 +22,7 @@ def showImageAndWait(name, img):
     cv2.destroyAllWindows()
 
 
-def prepImg(imgPath = './competition_files/datasets/train/Image199_2TPP_5R_MT_AS.jpg', isVerbose = True):
+def prepImg(imgPath = DEFAULT_IMG, isVerbose = True):
 
     # Read in the image
     result = cv2.imread(imgPath, 0)

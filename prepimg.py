@@ -89,18 +89,23 @@ if __name__ == "__main__":
     listOfImages = getImages(srcDir)
 
     # Prep the images and write them to disk
-    num = 0
-    for imgName in listOfImages:
-        if (isLimited and (num >= LIMIT_COUNT)):
-            break
+    if len(listOfImages) >= 0:
+        num = 0
 
-        num += 1
-        print('🖼 ' + str(num) + ': ' + imgName)
-        print('processing...')
-        processedImg = prepImg(srcDir + imgName, isVerbose)
-        print('writing...')
-        cv2.imwrite(DIR_OUTPUT + imgName, processedImg)
+        for imgName in listOfImages:
+            if (isLimited and (num >= LIMIT_COUNT)):
+                break
 
+            num += 1
+            print('🖼 ' + str(num) + ': ' + imgName)
+            print('processing...')
+            processedImg = prepImg(srcDir + imgName, isVerbose)
+            print('writing...')
+            cv2.imwrite(DIR_OUTPUT + imgName, processedImg)
+    else:
+        print('Couldn\'t find any images is source directory.')
+
+    # Done
     print('')
     print('🎉 Done! {0} images prepped.'.format(num))
 
