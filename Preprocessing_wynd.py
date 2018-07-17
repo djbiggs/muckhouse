@@ -18,7 +18,7 @@ def showImageAndWait(name, img):
     cv2.destroyAllWindows()
 
 
-def prepImg(imgPath = './competition_files/datasets/train/Image199_2TPP_5R_MT_AS.jpg', isVerbose=True):
+def prepImg(imgPath = './competition_files/datasets/train/Image149_2TPP_5R_MT_AS.jpg', isVerbose=True):
 
     img = cv2.imread(imgPath, 0)
 
@@ -28,7 +28,7 @@ def prepImg(imgPath = './competition_files/datasets/train/Image199_2TPP_5R_MT_AS
 
     ## define the size of the kernel to use for dialation
     ## dilate the image using the kernel
-    kernel = np.ones((5,9), np.uint8)
+    kernel = np.ones((4,7), np.uint8)
     img = cv2.dilate(img, kernel, iterations=1)
 
     ##Median Blur Filter
@@ -48,7 +48,7 @@ def prepImg(imgPath = './competition_files/datasets/train/Image199_2TPP_5R_MT_AS
 
     # apertureSize argument is the size of the filter for derivative approximation
 
-    kernel2 = np.ones((3,3), np.uint8)
+    kernel2 = np.ones((3,5), np.uint8)
     img = cv2.dilate(img, kernel2, iterations=2)
 
 
@@ -89,8 +89,11 @@ def prepImg(imgPath = './competition_files/datasets/train/Image199_2TPP_5R_MT_AS
     # [vert]
     # Specify size on vertical axis vertical, based on proportion of image px
     rows = vertical.shape[0]
-    verticalsize = int(rows / (0.2*cols))
-
+    verticalsize = int(rows / (0.2*rows))
+	
+	## Resolution 
+    res = int(rows * cols)
+     
     # Create structure element for extracting vertical lines through morphology operations
     verticalStructure = cv2.getStructuringElement(cv2.MORPH_RECT, (1, verticalsize))
 
@@ -106,8 +109,8 @@ def prepImg(imgPath = './competition_files/datasets/train/Image199_2TPP_5R_MT_AS
     img, contours, hierarchy = cv2.findContours(img, mode = cv2.RETR_LIST, method = cv2.CHAIN_APPROX_SIMPLE)
     for contour in contours:
      area = cv2.contourArea(contour)
-     if area > 5000:    
-      cv2.drawContours(orig_img, contours, 500, (0,0,255), 6)
+     if area > (res/rows):    
+      cv2.drawContours(orig_img, contours, int(cols*0.05), (0,0,255), 2 )
 	
     result = img
     #
@@ -122,10 +125,10 @@ def prepImg(imgPath = './competition_files/datasets/train/Image199_2TPP_5R_MT_AS
     (_,contours,_) = cv2.findContours(result, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     for contour in contours:
      area = cv2.contourArea(contour)
-     if area > 5000:
+     if area > (res/rows):
       (x,y,w,h) = cv2.boundingRect(contour)
-      cv2.rectangle(result, (x,y), (x+w,y+h), (255,255,255), 6)
-     
+      cv2.rectangle(result, (x,y), (x+w,y+h), (255,255,255), 3)
+      
      
     if isVerbose:
         showImageAndWait('Final Rectangles', result)
